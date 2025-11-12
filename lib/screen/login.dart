@@ -1,28 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:introbloc/model/user_model.dart';
+import 'package:introbloc/screen/prodact_page.dart';
+import 'package:introbloc/service/user_servese.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class Login extends StatelessWidget {
+  Login({super.key});
+  TextEditingController username = TextEditingController();
+  TextEditingController password = TextEditingController();
+  bool isVisible = true;
 
   @override
   Widget build(BuildContext context) {
+    UserServese userService = UserServese();
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         //crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              SizedBox(
-                child: Image.asset(
-                  "assets/background_image 1.png",
-                  height: 200,
-                  width: 375,
-                ),
+          Container(
+            height: 200,
+            width: 375,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: Image.asset("assets/background_image 1.png").image,
               ),
-              Positioned(
-                left: 24,
-                bottom: 16,
-                child: const Text(
+            ),
+            child: Column(
+              children: [
+                Text(
                   'Welcome Back',
                   style: TextStyle(
                     fontSize: 28,
@@ -37,8 +42,8 @@ class LoginScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           const SizedBox(height: 32),
@@ -46,6 +51,7 @@ class LoginScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: TextField(
+              controller: username,
               decoration: InputDecoration(
                 labelText: 'E-mail',
                 border: OutlineInputBorder(),
@@ -57,13 +63,28 @@ class LoginScreen extends StatelessWidget {
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.visibility_off),
-              ),
+            child: StatefulBuilder(
+              builder: (context, setState) {
+              return
+                TextField(
+                  controller: password,
+                  obscureText: isVisible,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isVisible ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isVisible = !isVisible;
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 
@@ -87,10 +108,28 @@ class LoginScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: SizedBox(
               width: double.infinity,
-              height: 48,
+              height: 48, 
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                onPressed: () {},
+                onPressed: () async {
+                  bool status = await userService.login(
+                    UserModel(username: username.text, password: password.text),
+                  );
+                  if (status) {
+                    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProdactPage()),
+      );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text("scsses")));
+                    
+                    
+                  } else {
+                    ScaffoldMessenger.of(context,
+                    ).showSnackBar(SnackBar(content: Text("error")));
+                  }
+                },
                 child: const Text('Sign in', style: TextStyle(fontSize: 16)),
               ),
             ),
